@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliment Generator</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #FFFAF0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-image: url('logo.png');
+            background-size: 200px 200px;
+            background-repeat: repeat;
+            background-position: top left;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            color: #ff63a1;
+        }
+
+        /* Style for the Relationship dropdown */
+        #relationship {
+            font-size: 1.2em;
+            padding: 12px;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        /* User input fields for `from_name` and `recipient_name` */
+        #fromNameInput, #recipientNameInput {
+            font-size: 1em;
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #FF1493;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button:hover {
+            background-color: #ff63a1;
+        }
+
+        .compliment-display {
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #FFE6F1;
+            display: none;
+        }
+
+        #customComplimentInput {
+            font-size: 1em;
+            padding: 10px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #submitCustomComplimentBtn {
+            font-size: 1.1em;
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #submitCustomComplimentBtn:hover {
+            background-color: #45a049;
+        }
+
+        #emailInput {
+            font-size: 1em;
+            padding: 10px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #sendComplimentBtn {
+            font-size: 1.2em;
+            background-color: #008CBA;
+            padding: 12px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #sendComplimentBtn:hover {
+            background-color: #006f8e;
+        }
+
+        /* Confetti and thank you text */
+        #thankYouText {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FF6347;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Compliment Generator</h1>
+
+        <!-- Input fields for `from_name` and `recipient_name` -->
+        <input type="text" id="fromNameInput" placeholder="Your Name (From)">
+        <input type="text" id="recipientNameInput" placeholder="Recipient's Name">
+
+        <select id="relationship" name="relationship" onchange="resetComplimentDisplay();">
+            <option value="lover">Lover</option>
+            <option value="colleague">Colleague</option>
+            <option value="friend">Friend</option>
+        </select>
+
+        <button id="generateComplimentBtn" onclick="generateCompliment()">Generate Compliment</button>
+
+        <div id="complimentDisplay" class="compliment-display"></div>
+
+        <!-- Custom Compliment Section -->
+        <div>
+            <textarea id="customComplimentInput" placeholder="Type your own compliment..."></textarea>
+
+            <button id="submitCustomComplimentBtn" onclick="submitCustomCompliment()">Submit Custom Compliment</button>
+        </div>
+
+        <!-- Email Section -->
+        <input type="email" id="emailInput" placeholder="Enter recipient's email" />
+
+        <button id="sendComplimentBtn" onclick="sendCompliment()">Send Compliment</button>
+
+        <div id="thankYouText">Thank You! You Are Awesome Too!</div> <!-- Thank you message -->
+    </div>
+
+    <!-- EmailJS Script (Updated URL) -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- Confetti Script -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // Initialize EmailJS with your public key
+        emailjs.init("X1oPtOtpqIPYDavkA");
+
+        // Compliments based on relationships
+        const compliments = {
+            lover: ["You're amazing!", "You make me happy!", "I love you!"],
+            colleague: ["You're a great coworker!", "I appreciate your help!", "Thanks for always having my back!"],
+            friend: ["You're the best friend!", "Thanks for being there for me!", "You're awesome!"]
+        };
+
+        // Reset display area
+        function resetComplimentDisplay() {
+            document.getElementById('complimentDisplay').style.display = 'none';
+            document.getElementById('thankYouText').style.display = 'none';
+        }
+
+        // Generate a compliment based on selected relationship
+        function generateCompliment() {
+            const relationship = document.getElementById('relationship').value;
+            const complimentsArray = compliments[relationship];
+            const randomCompliment = complimentsArray[Math.floor(Math.random() * complimentsArray.length)];
+            document.getElementById('complimentDisplay').innerText = randomCompliment;
+            document.getElementById('complimentDisplay').style.display = 'block';
+        }
+
+        // Submit custom compliment
+        function submitCustomCompliment() {
+            const customCompliment = document.getElementById('customComplimentInput').value;
+            if (customCompliment.trim() !== '') {
+                document.getElementById('complimentDisplay').innerText = customCompliment;
+                document.getElementById('complimentDisplay').style.display = 'block';
+            }
+        }
+
+        // Send compliment via EmailJS
+        function sendCompliment() {
+            const fromName = document.getElementById('fromNameInput').value;
+            const recipientName = document.getElementById('recipientNameInput').value;
+            const emailInput = document.getElementById('emailInput').value;
+            const complimentText = document.getElementById('complimentDisplay').innerText;
+
+            if (emailInput && fromName && recipientName && complimentText) {
+                const templateParams = {
+                    from_name: fromName,
+                    recipient_name: recipientName,
+                    compliment: complimentText,
+                    to_email: emailInput
+                };
+
+                emailjs.send('service_pnbywcc', 'template_c2axmcr', templateParams)
+                    .then(function(response) {
+                        console.log('SUCCESS!', response.status, response.text);
+                        document.getElementById('thankYouText').style.display = 'block';
+                        confetti({
+                            particleCount: 100,
+                            spread: 90,
+                            origin: { x: 0.5, y: 0.5 }
+                        });
+                    }, function(error) {
+                        console.error('FAILED...', error);
+                        alert('Something went wrong. Please try again later.');
+                    });
+            } else {
+                alert('Please fill in all fields before sending the compliment.');
+            }
+        }
+    </script>
+</body>
+</html>
